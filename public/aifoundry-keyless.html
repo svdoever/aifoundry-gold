@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Azure AI Foundry - client-side key-less</title>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.13.2/lib/msal-browser.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    button { padding: 0.5rem 1rem; margin: 0.25rem; }
+    pre { background: #f5f5f5; padding: 1rem; white-space: pre-wrap; }
+    .config-section { 
+      background: #f9f9f9; 
+      padding: 1rem; 
+      margin-bottom: 1rem; 
+      border-radius: 4px; 
+    }
+    .config-row { 
+      margin-bottom: 0.5rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+    }
+    .config-row label { 
+      min-width: 120px; 
+      font-weight: bold; 
+    }
+    .config-row input { 
+      flex: 1; 
+      padding: 0.25rem; 
+    }
+  </style>
+</head>
+<body>
+  <h1>Azure AI Foundry Chat (Browser)</h1>
+  
+  <div class="config-section">
+    <h3>Configuration</h3>
+    <div class="config-row">
+      <label for="clientId">Client ID:</label>
+      <input type="text" id="clientId" placeholder="Enter Client ID">
+    </div>
+    <div class="config-row">
+      <label for="tenantId">Tenant ID:</label>
+      <input type="text" id="tenantId" placeholder="Enter Tenant ID">
+    </div>
+    <div class="config-row">
+      <label for="resourceName">Resource Name:</label>
+      <input type="text" id="resourceName" placeholder="Enter AI Foundry Resource Name">
+    </div>
+    <div class="config-row">
+      <button id="saveConfig">Save to Local Storage</button>
+      <button id="clearConfig">Clear Local Storage</button>
+    </div>
+  </div>
+  
+  <button id="chat">Ask the Model</button>
+  <pre id="output">Click "Ask the Model" to start.</pre>
+
+  <script>
+    // ⚙️ Configuration Management
+    const LOCAL_STORAGE_PREFIX = 'aifoundry:';
+    
+    // Get URL parameters
+    function getUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        clientId: params.get('clientId'),
+        tenantId: params.get('tenantId'),
+        resourceName: params.get('resourceName')
+      };
+    }
+    
+    // Get values from local storage
+    function getStorageValues() {
+      return {
+        clientId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'clientId'),
+        tenantId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'tenantId'),
+        resourceName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'resourceName')
+      };
+    }
+    
+    // Save values to local storage
+    function saveToStorage(clientId, tenantId, resourceName) {
+      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'clientId', clientId);
+      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'tenantId', tenantId);
+      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'resourceName', resourceName);
+    }
+    
+    // Clear values from local storage
+    function clearStorage() {
+      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'clientId');
+      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'tenantId');
+      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'resourceName');
+    }
+    
+    // Initialize configuration values
+    function initializeConfig() {
+      const urlParams = getUrlParams();
+      const storageValues = getStorageValues();
+      
+      // Priority: URL params > Local Storage > Defaults
+      const config = {
+        clientId: urlParams.clientId || storageValues.clientId || '<app registration Client ID>',
+        tenantId: urlParams.tenantId || storageValues.tenantId || '<app registration Tenant ID>',
+        resourceName: urlParams.resourceName || storageValues.resourceName || '<AI Foundry Resource Name>'
+      };
+      
+      // Set input values
+      document.getElementById('clientId').value = config.clientId;
+      document.getElementById('tenantId').value = config.tenantId;
+      document.getElementById('resourceName').value = config.resourceName;
+      
+      return config;
+    }
+    
+    // Get current configuration from inputs
+    function getCurrentConfig() {
+      return {
+        clientId: document.getElementById('clientId').value.trim(),
+        tenantId: document.getElementById('tenantId').value.trim(),
+        resourceName: document.getElementById('resourceName').value.trim()
+      };
+    }
+    
+    // Initialize on page load
+    const config = initializeConfig();
+    
+    // Event handlers
+    document.getElementById('saveConfig').onclick = () => {
+      const currentConfig = getCurrentConfig();
+      if (currentConfig.clientId && currentConfig.tenantId && currentConfig.resourceName) {
+        saveToStorage(currentConfig.clientId, currentConfig.tenantId, currentConfig.resourceName);
+        alert('Configuration saved to local storage!');
+      } else {
+        alert('Please fill in all configuration fields before saving.');
+      }
+    };
+    
+    document.getElementById('clearConfig').onclick = () => {
+      clearStorage();
+      alert('Configuration cleared from local storage!');
+    };
+
+    // ⚙️ MSAL Configuration
+    function createMsalConfig() {
+      const currentConfig = getCurrentConfig();
+      const currentUrl = window.location.href.split('?')[0]; // Remove query string from redirect URI
+      
+      return {
+        auth: {
+          clientId: currentConfig.clientId,
+          authority: `https://login.microsoftonline.com/${currentConfig.tenantId}`,
+          redirectUri: currentUrl
+        }
+      };
+    }
+    
+    const scopes = ["https://cognitiveservices.azure.com/.default"];
+    const modelName = "gpt-4o";
+
+    async function getAccessToken() {
+      const msalConfig = createMsalConfig();
+      const msalInstance = new msal.PublicClientApplication(msalConfig);
+      await msalInstance.initialize();
+      
+      try {
+        const silent = await msalInstance.acquireTokenSilent({ scopes });
+        return silent.accessToken;
+      } catch {
+        const interactive = await msalInstance.loginPopup({ scopes });
+        return interactive.accessToken;
+      }
+    }
+
+    async function callChat(token, messages) {
+      const currentConfig = getCurrentConfig();
+      const endpoint = `https://${currentConfig.resourceName}.services.ai.azure.com/models`;
+      
+      const resp = await fetch(
+        `${endpoint}/chat/completions?api-version=2024-05-01-preview`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ model: modelName, messages })
+        }
+      );
+      if (!resp.ok) throw await resp.json();
+      return resp.json();
+    }
+
+    document.getElementById("chat").onclick = async () => {
+      const out = document.getElementById("output");
+      const currentConfig = getCurrentConfig();
+      
+      // Validate configuration
+      if (!currentConfig.clientId || !currentConfig.tenantId || !currentConfig.resourceName) {
+        out.textContent = "Error: Please fill in all configuration fields (Client ID, Tenant ID, Resource Name).";
+        return;
+      }
+      
+      out.textContent = "Processing...";
+
+      try {
+        const token = await getAccessToken();
+        const messages = [
+          { role: "system", content: "You are a pirate assistant." },
+          { role: "user", content: "Argh! How do I train a parrot?" }
+        ];
+        const result = await callChat(token, messages);
+        out.textContent = result.choices.map(c => c.message.content).join("\n\n");
+      } catch (e) {
+        console.error(e);
+        out.textContent = typeof e === "string" ? e : JSON.stringify(e, null, 2);
+      }
+    };
+  </script>
+</body>
+</html>
