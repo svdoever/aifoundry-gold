@@ -91,9 +91,14 @@ function App() {
           <p>Try our interactive demos to see the power of Azure AI Foundry in action</p>
           <div className="demo-grid">
             <div className="demo-card">
-              <h3>AI Foundry with key-less authentication</h3>
+              <h3>AI Foundry with client-side key-less authentication</h3>
               <p>Integrate AI Foundry with key-less authentication into a simple HTML page. Complete JavaScript-only solution.</p>
-              <button className="btn btn-outline">Try Demo</button>
+              <button 
+                className="btn btn-outline"
+                onClick={() => window.open('/aifoundry-keyless.html', '_blank')}
+              >
+                Try Demo
+              </button>
             </div>
           </div>
         </div>
