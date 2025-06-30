@@ -6,7 +6,14 @@ function App() {
       {/* Header */}
       <header className="header">
         <div className="nav">
-          <h2 className="brand">Azure AI Foundry</h2>
+          <div className="brand-container">
+            <img 
+              src="/aifoundry-gold.svg" 
+              alt="Azure AI Foundry Gold" 
+              className="brand-logo"
+            />
+            <h2 className="brand">Azure AI Foundry</h2>
+          </div>
           <nav className="nav-links">
             <a href="#features">Features</a>
             <a href="#demo">Demo</a>
@@ -50,7 +57,17 @@ function App() {
 
           <div className="cta-buttons">
             <button className="btn btn-primary">Get Started</button>
-            <button className="btn btn-secondary">View Demos</button>
+            <button 
+              className="btn btn-secondary"
+              onClick={() => {
+                const demoSection = document.getElementById('demo');
+                if (demoSection) {
+                  demoSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
+              View Demos
+            </button>
           </div>
         </div>
       </section>
@@ -95,7 +112,23 @@ function App() {
               <p>Integrate AI Foundry with key-less authentication into a simple HTML page. Complete JavaScript-only solution.</p>
               <button 
                 className="btn btn-outline"
-                onClick={() => window.open('/aifoundry-keyless.html', '_blank')}
+                onClick={() => {
+                  // Handle both development and production environments
+                  const currentPath = window.location.pathname;
+                  const isRoot = currentPath === '/' || currentPath === '/index.html';
+                  
+                  let demoUrl;
+                  if (isRoot) {
+                    // Root path - use absolute path
+                    demoUrl = `${window.location.origin}/aifoundry-keyless.html`;
+                  } else {
+                    // Subdirectory deployment - use relative to current directory
+                    const basePath = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+                    demoUrl = `${window.location.origin}${basePath}aifoundry-keyless.html`;
+                  }
+                  
+                  window.open(demoUrl, '_blank');
+                }}
               >
                 Try Demo
               </button>
