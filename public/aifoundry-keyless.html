@@ -2,54 +2,216 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Azure AI Foundry - client-side key-less</title>
+  <title>Azure AI Foundry - Browser</title>
+  <link rel="icon" type="image/svg+xml" href="/aifoundry-gold.svg">
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.13.2/lib/msal-browser.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; margin: 2rem; }
-    button { padding: 0.5rem 1rem; margin: 0.25rem; }
-    pre { background: #f5f5f5; padding: 1rem; white-space: pre-wrap; }
+    body { 
+      font-family: sans-serif; 
+      margin: 1rem; 
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    button { 
+      padding: 0.75rem 1rem; 
+      margin: 0.25rem; 
+      font-size: 16px;
+      min-height: 44px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #007acc;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005a99;
+    }
+    pre { 
+      background: #f5f5f5; 
+      padding: 1rem; 
+      white-space: pre-wrap; 
+      font-size: 14px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .header { 
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
+      margin-bottom: 2rem; 
+      padding-bottom: 1rem; 
+      border-bottom: 1px solid #eee; 
+    }
+    .header-text h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #333;
+    }
+    .subtitle {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #666;
+      font-style: italic;
+    }
+    .logo { 
+      width: 48px; 
+      height: 48px; 
+    }
     .config-section { 
       background: #f9f9f9; 
       padding: 1rem; 
       margin-bottom: 1rem; 
       border-radius: 4px; 
     }
+    .example-section {
+      background: #f0f8ff;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      border-left: 4px solid #007acc;
+    }
+    .example-section h3 {
+      margin: 0 0 0.75rem 0;
+      color: #333;
+      font-size: 1rem;
+    }
+    .example-prompt {
+      background: white;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 14px;
+      border: 1px solid #e0e0e0;
+    }
+    .example-prompt:last-child {
+      margin-bottom: 0;
+    }
+    .example-prompt strong {
+      color: #007acc;
+    }
     .config-row { 
-      margin-bottom: 0.5rem; 
+      margin-bottom: 1rem; 
       display: flex; 
-      align-items: center; 
+      flex-direction: column;
       gap: 0.5rem; 
     }
     .config-row label { 
-      min-width: 120px; 
       font-weight: bold; 
+      font-size: 16px;
+      color: #333;
     }
     .config-row input { 
-      flex: 1; 
-      padding: 0.25rem; 
+      padding: 0.75rem; 
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      min-height: 44px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .config-row input:focus {
+      outline: none;
+      border-color: #007acc;
+      box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.1);
+    }
+    .button-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .button-row button {
+      width: 100%;
+      min-width: unset;
+    }
+    
+    /* Desktop styles */
+    @media (min-width: 768px) {
+      body { 
+        margin: 2rem; 
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .config-row { 
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .config-row label { 
+        min-width: 150px; 
+        margin-right: 1rem;
+        text-align: right;
+      }
+      .config-row input { 
+        flex: 1; 
+        padding: 0.75rem;
+        min-height: 44px;
+        max-width: 400px;
+      }
+      button {
+        padding: 0.75rem 1rem;
+        font-size: 16px;
+        min-height: 44px;
+      }
+      .button-row {
+        flex-direction: row;
+        justify-content: flex-start;
+        margin-top: 1rem;
+      }
+      .button-row button {
+        width: auto;
+        min-width: 160px;
+        margin-right: 1rem;
+      }
+      .button-row button:last-child {
+        margin-right: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Azure AI Foundry Chat (Browser)</h1>
+  <div class="header">
+    <img src="/aifoundry-gold.svg" alt="Azure AI Foundry Gold" class="logo">
+    <div class="header-text">
+      <h1>Azure AI Foundry - Browser</h1>
+      <p class="subtitle">client-side key-less</p>
+    </div>
+  </div>
   
   <div class="config-section">
     <h3>Configuration</h3>
     <div class="config-row">
       <label for="clientId">Client ID:</label>
-      <input type="text" id="clientId" placeholder="Enter Client ID">
+      <input type="text" id="clientId" placeholder="e.g., 12345678-1234-1234-1234-123456789012">
     </div>
     <div class="config-row">
       <label for="tenantId">Tenant ID:</label>
-      <input type="text" id="tenantId" placeholder="Enter Tenant ID">
+      <input type="text" id="tenantId" placeholder="e.g., 87654321-4321-4321-4321-210987654321">
     </div>
     <div class="config-row">
       <label for="resourceName">Resource Name:</label>
-      <input type="text" id="resourceName" placeholder="Enter AI Foundry Resource Name">
+      <input type="text" id="resourceName" placeholder="e.g., my-ai-foundry-resource">
     </div>
     <div class="config-row">
+      <label for="deploymentName">Deployment Name:</label>
+      <input type="text" id="deploymentName" placeholder="e.g., gpt-4o, gpt-35-turbo">
+    </div>
+    <div class="config-row button-row">
       <button id="saveConfig">Save to Local Storage</button>
       <button id="clearConfig">Clear Local Storage</button>
+    </div>
+  </div>
+  
+  <div class="example-section">
+    <h3>Example Conversation</h3>
+    <div class="example-prompt">
+      <strong>System:</strong> You are a pirate assistant.
+    </div>
+    <div class="example-prompt">
+      <strong>User:</strong> Argh! How do I train a parrot?
     </div>
   </div>
   
@@ -66,7 +228,8 @@
       return {
         clientId: params.get('clientId'),
         tenantId: params.get('tenantId'),
-        resourceName: params.get('resourceName')
+        resourceName: params.get('resourceName'),
+        deploymentName: params.get('deploymentName')
       };
     }
     
@@ -75,15 +238,17 @@
       return {
         clientId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'clientId'),
         tenantId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'tenantId'),
-        resourceName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'resourceName')
+        resourceName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'resourceName'),
+        deploymentName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'deploymentName')
       };
     }
     
     // Save values to local storage
-    function saveToStorage(clientId, tenantId, resourceName) {
+    function saveToStorage(clientId, tenantId, resourceName, deploymentName) {
       localStorage.setItem(LOCAL_STORAGE_PREFIX + 'clientId', clientId);
       localStorage.setItem(LOCAL_STORAGE_PREFIX + 'tenantId', tenantId);
       localStorage.setItem(LOCAL_STORAGE_PREFIX + 'resourceName', resourceName);
+      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'deploymentName', deploymentName);
     }
     
     // Clear values from local storage
@@ -91,6 +256,7 @@
       localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'clientId');
       localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'tenantId');
       localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'resourceName');
+      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'deploymentName');
     }
     
     // Initialize configuration values
@@ -98,17 +264,19 @@
       const urlParams = getUrlParams();
       const storageValues = getStorageValues();
       
-      // Priority: URL params > Local Storage > Defaults
+      // Priority: URL params > Local Storage > Defaults (empty strings)
       const config = {
-        clientId: urlParams.clientId || storageValues.clientId || '<app registration Client ID>',
-        tenantId: urlParams.tenantId || storageValues.tenantId || '<app registration Tenant ID>',
-        resourceName: urlParams.resourceName || storageValues.resourceName || '<AI Foundry Resource Name>'
+        clientId: urlParams.clientId || storageValues.clientId || '',
+        tenantId: urlParams.tenantId || storageValues.tenantId || '',
+        resourceName: urlParams.resourceName || storageValues.resourceName || '',
+        deploymentName: urlParams.deploymentName || storageValues.deploymentName || ''
       };
       
       // Set input values
       document.getElementById('clientId').value = config.clientId;
       document.getElementById('tenantId').value = config.tenantId;
       document.getElementById('resourceName').value = config.resourceName;
+      document.getElementById('deploymentName').value = config.deploymentName;
       
       return config;
     }
@@ -118,7 +286,8 @@
       return {
         clientId: document.getElementById('clientId').value.trim(),
         tenantId: document.getElementById('tenantId').value.trim(),
-        resourceName: document.getElementById('resourceName').value.trim()
+        resourceName: document.getElementById('resourceName').value.trim(),
+        deploymentName: document.getElementById('deploymentName').value.trim()
       };
     }
     
@@ -128,8 +297,8 @@
     // Event handlers
     document.getElementById('saveConfig').onclick = () => {
       const currentConfig = getCurrentConfig();
-      if (currentConfig.clientId && currentConfig.tenantId && currentConfig.resourceName) {
-        saveToStorage(currentConfig.clientId, currentConfig.tenantId, currentConfig.resourceName);
+      if (currentConfig.clientId && currentConfig.tenantId && currentConfig.resourceName && currentConfig.deploymentName) {
+        saveToStorage(currentConfig.clientId, currentConfig.tenantId, currentConfig.resourceName, currentConfig.deploymentName);
         alert('Configuration saved to local storage!');
       } else {
         alert('Please fill in all configuration fields before saving.');
@@ -144,19 +313,18 @@
     // ⚙️ MSAL Configuration
     function createMsalConfig() {
       const currentConfig = getCurrentConfig();
-      const currentUrl = window.location.href.split('?')[0]; // Remove query string from redirect URI
+      const rootUrl = `${window.location.protocol}//${window.location.host}/`; // Use root of site
       
       return {
         auth: {
           clientId: currentConfig.clientId,
           authority: `https://login.microsoftonline.com/${currentConfig.tenantId}`,
-          redirectUri: currentUrl
+          redirectUri: rootUrl
         }
       };
     }
     
     const scopes = ["https://cognitiveservices.azure.com/.default"];
-    const modelName = "gpt-4o";
 
     async function getAccessToken() {
       const msalConfig = createMsalConfig();
@@ -184,7 +352,7 @@
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ model: modelName, messages })
+          body: JSON.stringify({ model: currentConfig.deploymentName, messages })
         }
       );
       if (!resp.ok) throw await resp.json();
@@ -196,8 +364,8 @@
       const currentConfig = getCurrentConfig();
       
       // Validate configuration
-      if (!currentConfig.clientId || !currentConfig.tenantId || !currentConfig.resourceName) {
-        out.textContent = "Error: Please fill in all configuration fields (Client ID, Tenant ID, Resource Name).";
+      if (!currentConfig.clientId || !currentConfig.tenantId || !currentConfig.resourceName || !currentConfig.deploymentName) {
+        out.textContent = "Error: Please fill in all configuration fields (Client ID, Tenant ID, Resource Name, Deployment Name).";
         return;
       }
       
