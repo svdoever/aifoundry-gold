@@ -1,8 +1,14 @@
 {
-  "name": "aifoundry-authenticate",
+  "name": "aifoundry-gold",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "Serge van den Oever",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/svdoever/aifoundry-gold.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
