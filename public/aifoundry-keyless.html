@@ -313,7 +313,7 @@
     // ⚙️ MSAL Configuration
     function createMsalConfig() {
       const currentConfig = getCurrentConfig();
-      const rootUrl = `${window.location.protocol}//${window.location.host}/`; // Use root of site
+      const rootUrl = `${window.location.protocol}//${window.location.host}`; // Use root of site
       
       return {
         auth: {
