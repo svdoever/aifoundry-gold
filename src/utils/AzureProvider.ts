@@ -2,8 +2,54 @@ import type { AIFoundryConfig } from "./AIFoundryConfigUtils";
 import { streamText, type LanguageModel, type CoreMessage } from "ai";
 import { type AzureOpenAIProviderSettings, createAzure } from "@ai-sdk/azure";
 
-// Azure MSAL authentication
+// Token cache interface
+interface TokenCache {
+  token: string;
+  expiresAt: number;
+  config: AIFoundryConfig;
+}
+
+// Global token cache
+let tokenCache: TokenCache | null = null;
+
+// Helper function to check if token is expired (with 5 minute buffer)
+function isTokenExpired(cache: TokenCache): boolean {
+  const bufferMs = 5 * 60 * 1000; // 5 minutes buffer
+  return Date.now() >= (cache.expiresAt - bufferMs);
+}
+
+// Helper function to check if config has changed
+function hasConfigChanged(cache: TokenCache, config: AIFoundryConfig): boolean {
+  return (
+    cache.config.clientId !== config.clientId ||
+    cache.config.tenantId !== config.tenantId ||
+    cache.config.resourceName !== config.resourceName
+  );
+}
+
+/**
+ * Clears the cached access token. Useful for logout scenarios or when forcing a fresh token.
+ */
+export function clearTokenCache(): void {
+  tokenCache = null;
+}
+
+/**
+ * Azure MSAL authentication with caching.
+ * Automatically caches tokens and refreshes them when expired or config changes.
+ * Uses a 5-minute buffer before expiration to ensure tokens don't expire during requests.
+ * 
+ * @param config - Azure AI Foundry configuration
+ * @returns Promise<string> - Access token
+ */
+
+// Azure MSAL authentication with caching
 export async function getAccessToken(config: AIFoundryConfig): Promise<string> {
+  // Check if we have a valid cached token
+  if (tokenCache && !isTokenExpired(tokenCache) && !hasConfigChanged(tokenCache, config)) {
+    return tokenCache.token;
+  }
+
   const { PublicClientApplication } = await import("@azure/msal-browser");
 
   const rootUrl = `${window.location.protocol}//${window.location.host}`;
@@ -20,13 +66,21 @@ export async function getAccessToken(config: AIFoundryConfig): Promise<string> {
   const msalInstance = new PublicClientApplication(msalConfig);
   await msalInstance.initialize();
 
+  let tokenResult;
   try {
-    const silent = await msalInstance.acquireTokenSilent({ scopes });
-    return silent.accessToken;
+    tokenResult = await msalInstance.acquireTokenSilent({ scopes });
   } catch {
-    const interactive = await msalInstance.loginPopup({ scopes });
-    return interactive.accessToken;
+    tokenResult = await msalInstance.loginPopup({ scopes });
   }
+
+  // Cache the token with expiration time
+  tokenCache = {
+    token: tokenResult.accessToken,
+    expiresAt: tokenResult.expiresOn?.getTime() || (Date.now() + 60 * 60 * 1000), // fallback to 1 hour
+    config: { ...config }
+  };
+
+  return tokenResult.accessToken;
 }
 
 // Create Azure AI Foundry language model that works with Vercel AI SDK
@@ -60,7 +114,7 @@ export async function chat(
       system: system,
       messages: messages,
       onFinish: async (event) => {
-        const onFinishResult = event as any;
+        const onFinishResult = event;
         console.log("Vercel AI SDK stream finished:", onFinishResult);
       },
       onError: (error) => {
