@@ -1,0 +1,122 @@
+.configSection {
+  background: #f9f9f9;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.configSection h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.configRow {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.configRow label {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+}
+
+.configRow input {
+  padding: 0.75rem;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-height: 44px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.configRow input:focus {
+  outline: none;
+  border-color: #007acc;
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.1);
+}
+
+.buttonRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.button {
+  padding: 0.75rem 1rem;
+  margin: 0.25rem;
+  font-size: 16px;
+  min-height: 44px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #007acc;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+}
+
+.button:hover {
+  background: #005a99;
+}
+
+.button.secondary {
+  background: #6c757d;
+  border-color: #6c757d;
+}
+
+.button.secondary:hover {
+  background: #545b62;
+}
+
+.validationError {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 0.25rem;
+}
+
+.successMessage {
+  color: #28a745;
+  font-size: 14px;
+  margin-top: 0.25rem;
+}
+
+/* Desktop styles */
+@media (min-width: 768px) {
+  .configRow {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .configRow label {
+    min-width: 150px;
+    margin-right: 1rem;
+    text-align: right;
+  }
+
+  .configRow input {
+    flex: 1;
+    max-width: 400px;
+  }
+
+  .buttonRow {
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-top: 1rem;
+  }
+
+  .buttonRow .button {
+    width: auto;
+    min-width: 160px;
+    margin-right: 1rem;
+  }
+
+  .buttonRow .button:last-child {
+    margin-right: 0;
+  }
+}

@@ -133,6 +133,32 @@ function App() {
                 Try Demo
               </button>
             </div>
+            <div className="demo-card">
+              <h3>AI Foundry with Vercel AI SDK - Keyless</h3>
+              <p>Modern React application using Vercel AI SDK with streaming support and keyless authentication. Built with TypeScript and CSS Modules.</p>
+              <button 
+                className="btn btn-outline"
+                onClick={() => {
+                  // Handle both development and production environments
+                  const currentPath = window.location.pathname;
+                  const isRoot = currentPath === '/' || currentPath === '/index.html';
+                  
+                  let demoUrl;
+                  if (isRoot) {
+                    // Root path - use absolute path
+                    demoUrl = `${window.location.origin}/keyless-vercel-ai-sdk.html`;
+                  } else {
+                    // Subdirectory deployment - use relative to current directory
+                    const basePath = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+                    demoUrl = `${window.location.origin}${basePath}keyless-vercel-ai-sdk.html`;
+                  }
+                  
+                  window.open(demoUrl, '_blank');
+                }}
+              >
+                Try Demo
+              </button>
+            </div>
           </div>
         </div>
       </section>
