@@ -24,7 +24,7 @@ The application uses the same local storage keys as the original HTML example (`
 
 ### Components
 
-- **AIFoundryConfigComponent**: Reusable configuration UI component
+- **AIFoundryConfig**: Reusable configuration UI component
 - **AIFoundryConfigUtils**: Utility functions for configuration management
 - **AzureProvider**: Custom Azure AI Foundry provider that implements streaming chat completions
 - **KeylessVercelAISDK**: Main example component
@@ -36,67 +36,6 @@ The application uses the same local storage keys as the original HTML example (`
 - CSS Modules
 - Vite 7
 - Azure MSAL Browser
-
-## Azure AI Foundry Integration
-
-The example uses the same Azure AI Foundry endpoint as the original HTML example:
-
-```typescript
-const endpoint = `https://${config.resourceName}.services.ai.azure.com/models`;
-
-const response = await fetch(
-  `${endpoint}/chat/completions?api-version=2024-05-01-preview`,
-  {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: config.deploymentName,
-      messages,
-      stream: true
-    })
-  }
-);
-```
-
-## Streaming Implementation
-
-The streaming is handled by parsing Server-Sent Events:
-
-```typescript
-const reader = response.body?.getReader();
-const decoder = new TextDecoder();
-
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-  
-  const chunk = decoder.decode(value, { stream: true });
-  const lines = chunk.split('\n');
-  
-  for (const line of lines) {
-    if (line.startsWith('data: ')) {
-      const data = line.slice(6).trim();
-      if (data === '[DONE]') return;
-      
-      const parsed = JSON.parse(data);
-      const content = parsed.choices?.[0]?.delta?.content;
-      if (content) {
-        yield content; // Stream content to UI
-      }
-    }
-  }
-}
-```
-
-## Usage
-
-1. Configure your Azure AI Foundry credentials in the configuration section
-2. Optionally modify the system message to customize the AI assistant behavior
-3. Start chatting with the AI assistant
-4. Experience real-time streaming responses
 
 ## Authentication Flow
 
