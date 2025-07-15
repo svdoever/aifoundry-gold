@@ -1,389 +1,521 @@
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Azure AI Foundry - key-less</title>
-  <link rel="icon" type="image/svg+xml" href="/aifoundry-gold.svg">
-  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.13.2/lib/msal-browser.min.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { 
-      font-family: sans-serif; 
-      margin: 1rem; 
-      font-size: 16px;
-      line-height: 1.5;
-    }
-    button { 
-      padding: 0.75rem 1rem; 
-      margin: 0.25rem; 
-      font-size: 16px;
-      min-height: 44px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: #007acc;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #005a99;
-    }
-    pre { 
-      background: #f5f5f5; 
-      padding: 1rem; 
-      white-space: pre-wrap; 
-      font-size: 14px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-    .header { 
-      display: flex; 
-      align-items: center; 
-      gap: 1rem; 
-      margin-bottom: 2rem; 
-      padding-bottom: 1rem; 
-      border-bottom: 1px solid #eee; 
-    }
-    .header-text h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      color: #333;
-    }
-    .subtitle {
-      margin: 0;
-      font-size: 0.9rem;
-      color: #666;
-      font-style: italic;
-    }
-    .logo { 
-      width: 48px; 
-      height: 48px; 
-    }
-    .config-section { 
-      background: #f9f9f9; 
-      padding: 1rem; 
-      margin-bottom: 1rem; 
-      border-radius: 4px; 
-    }
-    .example-section {
-      background: #f0f8ff;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 4px;
-      border-left: 4px solid #007acc;
-    }
-    .example-section h3 {
-      margin: 0 0 0.75rem 0;
-      color: #333;
-      font-size: 1rem;
-    }
-    .example-prompt {
-      background: white;
-      padding: 0.5rem 0.75rem;
-      margin-bottom: 0.5rem;
-      border-radius: 3px;
-      font-family: monospace;
-      font-size: 14px;
-      border: 1px solid #e0e0e0;
-    }
-    .example-prompt:last-child {
-      margin-bottom: 0;
-    }
-    .example-prompt strong {
-      color: #007acc;
-    }
-    .config-row { 
-      margin-bottom: 1rem; 
-      display: flex; 
-      flex-direction: column;
-      gap: 0.5rem; 
-    }
-    .config-row label { 
-      font-weight: bold; 
-      font-size: 16px;
-      color: #333;
-    }
-    .config-row input { 
-      padding: 0.75rem; 
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      min-height: 44px;
-      box-sizing: border-box;
-      width: 100%;
-    }
-    .config-row input:focus {
-      outline: none;
-      border-color: #007acc;
-      box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.1);
-    }
-    .button-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    .button-row button {
-      width: 100%;
-      min-width: unset;
-    }
-    
-    /* Desktop styles */
-    @media (min-width: 768px) {
-      body { 
-        margin: 2rem; 
-        max-width: 900px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .config-row { 
-        flex-direction: row;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-      .config-row label { 
-        min-width: 150px; 
-        margin-right: 1rem;
-        text-align: right;
-      }
-      .config-row input { 
-        flex: 1; 
-        padding: 0.75rem;
-        min-height: 44px;
-        max-width: 400px;
-      }
-      button {
-        padding: 0.75rem 1rem;
-        font-size: 16px;
-        min-height: 44px;
-      }
-      .button-row {
-        flex-direction: row;
-        justify-content: flex-start;
-        margin-top: 1rem;
-      }
-      .button-row button {
-        width: auto;
-        min-width: 160px;
-        margin-right: 1rem;
-      }
-      .button-row button:last-child {
-        margin-right: 0;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <img src="/aifoundry-gold.svg" alt="Azure AI Foundry Gold" class="logo">
-    <div class="header-text">
-      <h1>Azure AI Foundry - Completely in Browser</h1>
-      <p class="subtitle">client-side key-less</p>
-    </div>
-  </div>
-  
-  <div class="config-section">
-    <h3>Configuration</h3>
-    <div class="config-row">
-      <label for="clientId">Client ID:</label>
-      <input type="text" id="clientId" placeholder="e.g., 12345678-1234-1234-1234-123456789012">
-    </div>
-    <div class="config-row">
-      <label for="tenantId">Tenant ID:</label>
-      <input type="text" id="tenantId" placeholder="e.g., 87654321-4321-4321-4321-210987654321">
-    </div>
-    <div class="config-row">
-      <label for="resourceName">Resource Name:</label>
-      <input type="text" id="resourceName" placeholder="e.g., my-ai-foundry-resource">
-    </div>
-    <div class="config-row">
-      <label for="deploymentName">Deployment Name:</label>
-      <input type="text" id="deploymentName" placeholder="e.g., gpt-4o, gpt-35-turbo">
-    </div>
-    <div class="config-row button-row">
-      <button id="saveConfig">Save to Local Storage</button>
-      <button id="clearConfig">Clear Local Storage</button>
-    </div>
-  </div>
-  
-  <div class="example-section">
-    <h3>Example Conversation</h3>
-    <div class="example-prompt">
-      <strong>System:</strong> You are a pirate assistant.
-    </div>
-    <div class="example-prompt">
-      <strong>User:</strong> Argh! How do I train a parrot?
-    </div>
-  </div>
-  
-  <button id="chat">Ask the Model</button>
-  <pre id="output">Click "Ask the Model" to start.</pre>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Azure AI Foundry - key-less</title>
+        <link rel="icon" type="image/svg+xml" href="/aifoundry-gold.svg">
+        <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@4.13.2/lib/msal-browser.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            body {
+                font-family: sans-serif;
+                margin: 1rem;
+                font-size: 16px;
+                line-height: 1.5;
+            }
+            button {
+                padding: 0.75rem 1rem;
+                margin: 0.25rem;
+                font-size: 16px;
+                min-height: 44px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background: #007acc;
+                color: white;
+                cursor: pointer;
+            }
+            button:hover {
+                background: #005a99;
+            }
+            pre {
+                background: #f5f5f5;
+                padding: 1rem;
+                white-space: pre-wrap;
+                font-size: 14px;
+                border-radius: 4px;
+                overflow-x: auto;
+            }
+            .header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #eee;
+            }
+            .header-text h1 {
+                margin: 0;
+                font-size: 1.5rem;
+                color: #333;
+            }
+            .subtitle {
+                margin: 0;
+                font-size: 0.9rem;
+                color: #666;
+                font-style: italic;
+            }
+            .logo {
+                width: 48px;
+                height: 48px;
+            }
+            .config-section {
+                background: #f9f9f9;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 4px;
+            }
+            .example-section {
+                background: #f0f8ff;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 4px;
+                border-left: 4px solid #007acc;
+            }
+            .example-section h3 {
+                margin: 0 0 0.75rem 0;
+                color: #333;
+                font-size: 1rem;
+            }
+            .example-prompt {
+                background: white;
+                padding: 0.5rem 0.75rem;
+                margin-bottom: 0.5rem;
+                border-radius: 3px;
+                font-family: monospace;
+                font-size: 14px;
+                border: 1px solid #e0e0e0;
+            }
+            .example-prompt:last-child {
+                margin-bottom: 0;
+            }
+            .example-prompt strong {
+                color: #007acc;
+            }
+            .config-row {
+                margin-bottom: 1rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .config-row label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #333;
+            }
+            .config-row input {
+                padding: 0.75rem;
+                font-size: 16px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                min-height: 44px;
+                box-sizing: border-box;
+                width: 100%;
+            }
+            .config-row input:focus {
+                outline: none;
+                border-color: #007acc;
+                box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.1);
+            }
+            .button-row {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-top: 1rem;
+            }
+            .button-row button {
+                width: 100%;
+                min-width: unset;
+            }
+            .azure-portal-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: #007acc;
+                text-decoration: none;
+                font-size: 14px;
+                margin-top: 0.5rem;
+                padding: 0.5rem 0.75rem;
+                border: 1px solid #007acc;
+                border-radius: 4px;
+                background: #f8f8f8;
+                transition: all 0.2s;
+            }
+            .azure-portal-link:hover {
+                background: #007acc;
+                color: white;
+                text-decoration: none;
+            }
+            .azure-portal-link:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+            .config-note {
+                font-size: 14px;
+                color: #666;
+                margin-top: 0.5rem;
+                line-height: 1.4;
+            }
+            .input-with-copy {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .input-with-copy input {
+                flex: 1;
+            }
+            .copy-button {
+                background: #f8f8f8;
+                border: 1px solid #ddd;
+                color: #666;
+                cursor: pointer;
+                padding: 0.75rem;
+                font-size: 16px;
+                line-height: 1;
+                min-height: 44px;
+                border-radius: 4px;
+                transition: all 0.2s;
+                flex-shrink: 0;
+            }
+            .copy-button:hover {
+                background: #f0f0f0;
+                color: #007acc;
+                border-color: #007acc;
+            }
+            .copy-button:active {
+                background: #007acc;
+                color: white;
+            }
 
-  <script>
-    // ⚙️ Configuration Management
-    const LOCAL_STORAGE_PREFIX = 'aifoundry:';
-    
-    // Get URL parameters
-    function getUrlParams() {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        clientId: params.get('clientId'),
-        tenantId: params.get('tenantId'),
-        resourceName: params.get('resourceName'),
-        deploymentName: params.get('deploymentName')
-      };
-    }
-    
-    // Get values from local storage
-    function getStorageValues() {
-      return {
-        clientId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'clientId'),
-        tenantId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'tenantId'),
-        resourceName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'resourceName'),
-        deploymentName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'deploymentName')
-      };
-    }
-    
-    // Save values to local storage
-    function saveToStorage(clientId, tenantId, resourceName, deploymentName) {
-      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'clientId', clientId);
-      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'tenantId', tenantId);
-      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'resourceName', resourceName);
-      localStorage.setItem(LOCAL_STORAGE_PREFIX + 'deploymentName', deploymentName);
-    }
-    
-    // Clear values from local storage
-    function clearStorage() {
-      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'clientId');
-      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'tenantId');
-      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'resourceName');
-      localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'deploymentName');
-    }
-    
-    // Initialize configuration values
-    function initializeConfig() {
-      const urlParams = getUrlParams();
-      const storageValues = getStorageValues();
-      
-      // Priority: URL params > Local Storage > Defaults (empty strings)
-      const config = {
-        clientId: urlParams.clientId || storageValues.clientId || '',
-        tenantId: urlParams.tenantId || storageValues.tenantId || '',
-        resourceName: urlParams.resourceName || storageValues.resourceName || '',
-        deploymentName: urlParams.deploymentName || storageValues.deploymentName || ''
-      };
-      
-      // Set input values
-      document.getElementById('clientId').value = config.clientId;
-      document.getElementById('tenantId').value = config.tenantId;
-      document.getElementById('resourceName').value = config.resourceName;
-      document.getElementById('deploymentName').value = config.deploymentName;
-      
-      return config;
-    }
-    
-    // Get current configuration from inputs
-    function getCurrentConfig() {
-      return {
-        clientId: document.getElementById('clientId').value.trim(),
-        tenantId: document.getElementById('tenantId').value.trim(),
-        resourceName: document.getElementById('resourceName').value.trim(),
-        deploymentName: document.getElementById('deploymentName').value.trim()
-      };
-    }
-    
-    // Initialize on page load
-    const config = initializeConfig();
-    
-    // Event handlers
-    document.getElementById('saveConfig').onclick = () => {
-      const currentConfig = getCurrentConfig();
-      if (currentConfig.clientId && currentConfig.tenantId && currentConfig.resourceName && currentConfig.deploymentName) {
-        saveToStorage(currentConfig.clientId, currentConfig.tenantId, currentConfig.resourceName, currentConfig.deploymentName);
-        alert('Configuration saved to local storage!');
-      } else {
-        alert('Please fill in all configuration fields before saving.');
-      }
-    };
-    
-    document.getElementById('clearConfig').onclick = () => {
-      clearStorage();
-      alert('Configuration cleared from local storage!');
-    };
+            /* Desktop styles */
+            @media (min-width: 768px) {
+                body {
+                    margin: 2rem;
+                    max-width: 900px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                .config-row {
+                    flex-direction: row;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                }
+                .config-row label {
+                    min-width: 150px;
+                    margin-right: 1rem;
+                    text-align: right;
+                }
+                .config-row input {
+                    flex: 1;
+                    padding: 0.75rem;
+                    min-height: 44px;
+                    max-width: 400px;
+                }
+                .input-with-copy {
+                    flex: 1;
+                    max-width: 400px;
+                }
+                button {
+                    padding: 0.75rem 1rem;
+                    font-size: 16px;
+                    min-height: 44px;
+                }
+                .button-row {
+                    flex-direction: row;
+                    justify-content: flex-start;
+                    margin-top: 1rem;
+                }
+                .button-row button {
+                    width: auto;
+                    min-width: 160px;
+                    margin-right: 1rem;
+                }
+                .button-row button:last-child {
+                    margin-right: 0;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div style="margin: 20px">
+            <div class="header">
+                <img src="/aifoundry-gold.svg" alt="Azure AI Foundry Gold" class="logo">
+                <div class="header-text">
+                    <h1>Azure AI Foundry - Completely in Browser</h1>
+                    <p class="subtitle">client-side key-less</p>
+                </div>
+            </div>
 
-    // ⚙️ MSAL Configuration
-    function createMsalConfig() {
-      const currentConfig = getCurrentConfig();
-      const rootUrl = `${window.location.protocol}//${window.location.host}`; // Use root of site
-      
-      return {
-        auth: {
-          clientId: currentConfig.clientId,
-          authority: `https://login.microsoftonline.com/${currentConfig.tenantId}`,
-          redirectUri: rootUrl
-        }
-      };
-    }
-    
-    const scopes = ["https://cognitiveservices.azure.com/.default"];
+            <div class="config-section">
+                <h3>Configuration</h3>
+                <div class="config-row">
+                    <label for="clientId">Client ID:</label>
+                    <input type="text" id="clientId" placeholder="e.g., 12345678-1234-1234-1234-123456789012" />
+                </div>
+                <div class="config-row">
+                    <label for="tenantId">Tenant ID:</label>
+                    <input type="text" id="tenantId" placeholder="e.g., 87654321-4321-4321-4321-210987654321" />
+                </div>
+                <div class="config-row">
+                    <label for="resourceName">Resource Name:</label>
+                    <input type="text" id="resourceName" placeholder="e.g., my-ai-foundry-resource" />
+                </div>
+                <div class="config-row">
+                    <label for="deploymentName">Deployment Name:</label>
+                    <input type="text" id="deploymentName" placeholder="e.g., gpt-4o, gpt-35-turbo" />
+                </div>
+                <div class="config-row">
+                    <label for="redirectUri">Redirect URI:</label>
+                    <div class="input-with-copy">
+                        <input type="text" id="redirectUri" placeholder="e.g., https://yoursite.com/aifoundry.html" />
+                        <button type="button" class="copy-button" id="copyRedirectUri" title="Copy to clipboard">📋</button>
+                    </div>
+                </div>
+                <div class="config-note">
+                    ⚠️ <strong>Important:</strong> This redirect URI must be registered as a <strong>Single-page application</strong> redirect URI in your Azure App Registration.
+                    <br>
+                    <a href="#" id="azurePortalLink" class="azure-portal-link" target="_blank" rel="noopener noreferrer">
+                        🔗 Open Azure Portal App Registration
+                    </a>
+                </div>
+                <div class="config-row button-row">
+                    <button id="saveConfig">Save to Local Storage</button>
+                    <button id="clearConfig">Clear Local Storage</button>
+                </div>
+            </div>
 
-    async function getAccessToken() {
-      const msalConfig = createMsalConfig();
-      const msalInstance = new msal.PublicClientApplication(msalConfig);
-      await msalInstance.initialize();
-      
-      try {
-        const silent = await msalInstance.acquireTokenSilent({ scopes });
-        return silent.accessToken;
-      } catch {
-        const interactive = await msalInstance.loginPopup({ scopes });
-        return interactive.accessToken;
-      }
-    }
+            <div class="example-section">
+                <h3>Example Conversation</h3>
+                <div class="example-prompt"><strong>System:</strong> You are a pirate assistant.</div>
+                <div class="example-prompt"><strong>User:</strong> Argh! How do I train a parrot?</div>
+            </div>
 
-    async function callChat(token, messages) {
-      const currentConfig = getCurrentConfig();
-      const endpoint = `https://${currentConfig.resourceName}.services.ai.azure.com/models`;
-      
-      const resp = await fetch(
-        `${endpoint}/chat/completions?api-version=2024-05-01-preview`,
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ model: currentConfig.deploymentName, messages })
-        }
-      );
-      if (!resp.ok) throw await resp.json();
-      return resp.json();
-    }
+            <button id="chat">Ask the Model</button>
+            <pre id="output">Click "Ask the Model" to start.</pre>
+        </div>
+        <script>
+            // ⚙️ Configuration Management
+            const LOCAL_STORAGE_PREFIX = "aifoundry:";
 
-    document.getElementById("chat").onclick = async () => {
-      const out = document.getElementById("output");
-      const currentConfig = getCurrentConfig();
-      
-      // Validate configuration
-      if (!currentConfig.clientId || !currentConfig.tenantId || !currentConfig.resourceName || !currentConfig.deploymentName) {
-        out.textContent = "Error: Please fill in all configuration fields (Client ID, Tenant ID, Resource Name, Deployment Name).";
-        return;
-      }
-      
-      out.textContent = "Processing...";
+            // Get URL parameters
+            function getUrlParams() {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    clientId: params.get("clientId"),
+                    tenantId: params.get("tenantId"),
+                    resourceName: params.get("resourceName"),
+                    deploymentName: params.get("deploymentName"),
+                    redirectUri: params.get("redirectUri"),
+                };
+            }
 
-      try {
-        const token = await getAccessToken();
-        const messages = [
-          { role: "system", content: "You are a pirate assistant." },
-          { role: "user", content: "Argh! How do I train a parrot?" }
-        ];
-        const result = await callChat(token, messages);
-        out.textContent = result.choices.map(c => c.message.content).join("\n\n");
-      } catch (e) {
-        console.error(e);
-        out.textContent = typeof e === "string" ? e : JSON.stringify(e, null, 2);
-      }
-    };
-  </script>
-</body>
+            // Get values from local storage
+            function getStorageValues() {
+                return {
+                    clientId: localStorage.getItem(LOCAL_STORAGE_PREFIX + "clientId"),
+                    tenantId: localStorage.getItem(LOCAL_STORAGE_PREFIX + "tenantId"),
+                    resourceName: localStorage.getItem(LOCAL_STORAGE_PREFIX + "resourceName"),
+                    deploymentName: localStorage.getItem(LOCAL_STORAGE_PREFIX + "deploymentName"),
+                    redirectUri: localStorage.getItem(LOCAL_STORAGE_PREFIX + "redirectUri"),
+                };
+            }
+
+            // Save values to local storage
+            function saveToStorage(clientId, tenantId, resourceName, deploymentName, redirectUri) {
+                localStorage.setItem(LOCAL_STORAGE_PREFIX + "clientId", clientId);
+                localStorage.setItem(LOCAL_STORAGE_PREFIX + "tenantId", tenantId);
+                localStorage.setItem(LOCAL_STORAGE_PREFIX + "resourceName", resourceName);
+                localStorage.setItem(LOCAL_STORAGE_PREFIX + "deploymentName", deploymentName);
+                localStorage.setItem(LOCAL_STORAGE_PREFIX + "redirectUri", redirectUri);
+            }
+
+            // Clear values from local storage
+            function clearStorage() {
+                localStorage.removeItem(LOCAL_STORAGE_PREFIX + "clientId");
+                localStorage.removeItem(LOCAL_STORAGE_PREFIX + "tenantId");
+                localStorage.removeItem(LOCAL_STORAGE_PREFIX + "resourceName");
+                localStorage.removeItem(LOCAL_STORAGE_PREFIX + "deploymentName");
+                localStorage.removeItem(LOCAL_STORAGE_PREFIX + "redirectUri");
+            }
+
+            // Initialize configuration values
+            function initializeConfig() {
+                const urlParams = getUrlParams();
+                const storageValues = getStorageValues();
+                const currentPageUrl = window.location.href.split('?')[0]; // Remove query parameters
+
+                // Priority: URL params > Local Storage > Defaults
+                const config = {
+                    clientId: urlParams.clientId || storageValues.clientId || "",
+                    tenantId: urlParams.tenantId || storageValues.tenantId || "",
+                    resourceName: urlParams.resourceName || storageValues.resourceName || "",
+                    deploymentName: urlParams.deploymentName || storageValues.deploymentName || "",
+                    redirectUri: urlParams.redirectUri || storageValues.redirectUri || currentPageUrl,
+                };
+
+                // Set input values
+                document.getElementById("clientId").value = config.clientId;
+                document.getElementById("tenantId").value = config.tenantId;
+                document.getElementById("resourceName").value = config.resourceName;
+                document.getElementById("deploymentName").value = config.deploymentName;
+                document.getElementById("redirectUri").value = config.redirectUri;
+
+                return config;
+            }
+
+            // Get current configuration from inputs
+            function getCurrentConfig() {
+                return {
+                    clientId: document.getElementById("clientId").value.trim(),
+                    tenantId: document.getElementById("tenantId").value.trim(),
+                    resourceName: document.getElementById("resourceName").value.trim(),
+                    deploymentName: document.getElementById("deploymentName").value.trim(),
+                    redirectUri: document.getElementById("redirectUri").value.trim(),
+                };
+            }
+
+            // Initialize on page load
+            const config = initializeConfig();
+
+            // Update Azure Portal link when Client ID changes
+            function updateAzurePortalLink() {
+                const clientId = document.getElementById("clientId").value.trim();
+                const azurePortalLink = document.getElementById("azurePortalLink");
+
+                if (clientId) {
+                    azurePortalLink.href = `https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Authentication/appId/${clientId}`;
+                    azurePortalLink.style.pointerEvents = '';
+                    azurePortalLink.style.opacity = '';
+                    azurePortalLink.textContent = '🔗 Open Azure Portal App Registration';
+                } else {
+                    azurePortalLink.href = '#';
+                    azurePortalLink.style.pointerEvents = 'none';
+                    azurePortalLink.style.opacity = '0.5';
+                    azurePortalLink.textContent = '🔗 Enter Client ID to enable Azure Portal link';
+                }
+            }
+
+            // Update link on page load and when Client ID changes
+            updateAzurePortalLink();
+            document.getElementById("clientId").addEventListener('input', updateAzurePortalLink);
+
+            // Copy redirect URI functionality
+            document.getElementById("copyRedirectUri").onclick = async () => {
+                const redirectUriInput = document.getElementById("redirectUri");
+                const copyButton = document.getElementById("copyRedirectUri");
+
+                try {
+                    await navigator.clipboard.writeText(redirectUriInput.value);
+                    // Visual feedback
+                    copyButton.textContent = "✅";
+                    setTimeout(() => {
+                        copyButton.textContent = "📋";
+                    }, 1000);
+                } catch (err) {
+                    // Fallback for older browsers
+                    redirectUriInput.select();
+                    redirectUriInput.setSelectionRange(0, 99999);
+                    document.execCommand('copy');
+                    // Visual feedback
+                    copyButton.textContent = "✅";
+                    setTimeout(() => {
+                        copyButton.textContent = "📋";
+                    }, 1000);
+                }
+            };
+
+            // Event handlers
+            document.getElementById("saveConfig").onclick = () => {
+                const currentConfig = getCurrentConfig();
+                if (currentConfig.clientId && currentConfig.tenantId && currentConfig.resourceName && currentConfig.deploymentName && currentConfig.redirectUri) {
+                    saveToStorage(currentConfig.clientId, currentConfig.tenantId, currentConfig.resourceName, currentConfig.deploymentName, currentConfig.redirectUri);
+                    alert("Configuration saved to local storage!");
+                } else {
+                    alert("Please fill in all configuration fields before saving.");
+                }
+            };
+
+            document.getElementById("clearConfig").onclick = () => {
+                clearStorage();
+                alert("Configuration cleared from local storage!");
+            };
+
+            // ⚙️ MSAL Configuration
+            function createMsalConfig() {
+                const currentConfig = getCurrentConfig();
+                return {
+                    auth: {
+                        clientId: currentConfig.clientId,
+                        authority: `https://login.microsoftonline.com/${currentConfig.tenantId}`,
+                        redirectUri: currentConfig.redirectUri,
+                    },
+                };
+            }
+
+            const scopes = ["https://cognitiveservices.azure.com/.default"];
+
+            async function getAccessToken() {
+                const msalConfig = createMsalConfig();
+                const msalInstance = new msal.PublicClientApplication(msalConfig);
+                await msalInstance.initialize();
+
+                try {
+                    //const silent = await msalInstance.acquireTokenSilent({ scopes });
+                    //return silent.accessToken;
+                    const interactive = await msalInstance.loginPopup({
+                        scopes,
+                        prompt: "select_account"
+                    });
+                    return interactive.accessToken;
+                } catch (error) {
+                    alert("Error acquiring token: " + (error.message || error));
+                    throw error; // Re-throw the error for further handling
+                }
+            }
+
+            async function callChat(token, messages) {
+                const currentConfig = getCurrentConfig();
+                const endpoint = `https://${currentConfig.resourceName}.services.ai.azure.com/models`;
+
+                const resp = await fetch(`${endpoint}/chat/completions?api-version=2024-05-01-preview`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ model: currentConfig.deploymentName, messages }),
+                });
+                if (!resp.ok) throw await resp.json();
+                return resp.json();
+            }
+
+            document.getElementById("chat").onclick = async () => {
+                const out = document.getElementById("output");
+                const currentConfig = getCurrentConfig();
+
+                // Validate configuration
+                if (!currentConfig.clientId || !currentConfig.tenantId || !currentConfig.resourceName || !currentConfig.deploymentName || !currentConfig.redirectUri) {
+                    out.textContent =
+                        "Error: Please fill in all configuration fields (Client ID, Tenant ID, Resource Name, Deployment Name, Redirect URI).";
+                    return;
+                }
+
+                out.textContent = "Processing...";
+
+                try {
+                    const token = await getAccessToken();
+                    const messages = [
+                        { role: "system", content: "You are a pirate assistant." },
+                        { role: "user", content: "Argh! How do I train a parrot?" },
+                    ];
+                    const result = await callChat(token, messages);
+                    out.textContent = result.choices.map((c) => c.message.content).join("\n\n");
+                } catch (e) {
+                    console.error(e);
+                    out.textContent = typeof e === "string" ? e : JSON.stringify(e, null, 2);
+                }
+            };
+        </script>
+    </body>
 </html>
