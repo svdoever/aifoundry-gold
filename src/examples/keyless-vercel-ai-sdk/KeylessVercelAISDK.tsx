@@ -23,6 +23,13 @@ export function KeylessVercelAISDK() {
   const [isStreaming, setIsStreaming] = useState(false);
   const chatBodyRef = useRef<HTMLDivElement>(null);
 
+  // Load initial config from localStorage on component mount
+  useEffect(() => {
+    const initialConfig = AIFoundryConfigUtils.getConfig();
+    console.log('KeylessVercelAISDK: Initial config loaded:', initialConfig);
+    setConfig(initialConfig);
+  }, []);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatBodyRef.current) {
@@ -31,6 +38,7 @@ export function KeylessVercelAISDK() {
   }, [messages, streamingContent]);
 
   const handleConfigChange = useCallback((newConfig: AIFoundryConfig) => {
+    console.log('KeylessVercelAISDK: Config changed:', newConfig);
     setConfig(newConfig);
   }, []);
 

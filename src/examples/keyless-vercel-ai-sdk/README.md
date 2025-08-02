@@ -13,12 +13,43 @@ This example demonstrates how to use Azure AI Foundry with keyless authenticatio
 
 ## Configuration
 
+The application uses local storage to persist configuration across browser sessions. All settings can be configured through the UI or passed as URL parameters.
+
+### Local Storage Keys
+
 The application uses the same local storage keys as the original HTML example (`aifoundry-keyless.html`) for consistency:
 
 - `aifoundry:clientId` - Azure App Registration Client ID
-- `aifoundry:tenantId` - Azure Tenant ID
+- `aifoundry:tenantId` - Azure Tenant ID  
 - `aifoundry:resourceName` - Azure AI Foundry resource name
-- `aifoundry:deploymentName` - Model deployment name (e.g., gpt-4o, gpt-4.1)
+- `aifoundry:deploymentName` - Model deployment name (e.g., gpt-4o, gpt-35-turbo)
+- `aifoundry:redirectUri` - Single-page application redirect URI
+
+### Configuration
+
+Configuration values are loaded from **Local Storage**.
+
+### Azure App Registration Setup
+
+The configuration UI provides several helpful features for Azure setup:
+
+#### Redirect URI Management
+- **Auto-detection**: The current page URL is automatically detected as the default redirect URI
+- **Copy to Clipboard**: Click the 📋 button to copy the redirect URI for easy pasting into Azure Portal
+- **Validation**: The redirect URI must be registered as a **Single-page application** redirect URI in Azure
+
+#### Azure Portal Integration
+- **Direct Link**: When a Client ID is entered, a direct link to the Azure App Registration Authentication page is generated
+- **Quick Access**: Click "🔗 Open Azure Portal App Registration" to jump directly to the correct configuration page
+- **Disabled State**: The link is disabled until a valid Client ID is provided
+
+### Storage Management
+
+The configuration UI provides storage management options:
+
+- **Save to Local Storage**: Persists all configuration values for future sessions (requires all fields to be filled)
+- **Clear Local Storage**: Removes all stored configuration values
+- **Validation**: Visual feedback shows success/error messages for storage operations
 
 ## Architecture
 

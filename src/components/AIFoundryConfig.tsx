@@ -17,10 +17,9 @@ export function AIFoundryConfigComponent({
     clientId: '',
     tenantId: '',
     resourceName: '',
-    deploymentName: ''
+    deploymentName: '',
+    redirectUri: ''
   });
-  
-  const [redirectUri, setRedirectUri] = useState('');
   
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -42,13 +41,12 @@ export function AIFoundryConfigComponent({
       clientId: urlParams.get('clientId') || storageValues.clientId,
       tenantId: urlParams.get('tenantId') || storageValues.tenantId,
       resourceName: urlParams.get('resourceName') || storageValues.resourceName,
-      deploymentName: urlParams.get('deploymentName') || storageValues.deploymentName
+      deploymentName: urlParams.get('deploymentName') || storageValues.deploymentName,
+      redirectUri: urlParams.get('redirectUri') || storageValues.redirectUri || currentPageUrl
     };
 
-    const newRedirectUri = urlParams.get('redirectUri') || storageValues.redirectUri || currentPageUrl;
-
     setConfig(newConfig);
-    setRedirectUri(newRedirectUri);
+    console.log('AIFoundryConfig: Config loaded:', newConfig);
     onConfigChange?.(newConfig);
   }, [onConfigChange]);
 
@@ -64,7 +62,7 @@ export function AIFoundryConfigComponent({
   };
 
   const saveToStorage = () => {
-    if (!config.clientId || !config.tenantId || !config.resourceName || !config.deploymentName || !redirectUri) {
+    if (!config.clientId || !config.tenantId || !config.resourceName || !config.deploymentName || !config.redirectUri) {
       setMessage({ text: 'Please fill in all configuration fields before saving.', type: 'error' });
       return;
     }
@@ -73,8 +71,9 @@ export function AIFoundryConfigComponent({
     localStorage.setItem(LOCAL_STORAGE_PREFIX + 'tenantId', config.tenantId);
     localStorage.setItem(LOCAL_STORAGE_PREFIX + 'resourceName', config.resourceName);
     localStorage.setItem(LOCAL_STORAGE_PREFIX + 'deploymentName', config.deploymentName);
-    localStorage.setItem(LOCAL_STORAGE_PREFIX + 'redirectUri', redirectUri);
+    localStorage.setItem(LOCAL_STORAGE_PREFIX + 'redirectUri', config.redirectUri);
 
+    console.log('AIFoundryConfig: Saved config to localStorage:', config);
     setMessage({ text: 'Configuration saved to local storage!', type: 'success' });
     setTimeout(() => setMessage(null), 3000);
   };
@@ -92,13 +91,13 @@ export function AIFoundryConfigComponent({
 
   const copyRedirectUri = async () => {
     try {
-      await navigator.clipboard.writeText(redirectUri);
+      await navigator.clipboard.writeText(config.redirectUri || '');
       setMessage({ text: 'Redirect URI copied to clipboard!', type: 'success' });
       setTimeout(() => setMessage(null), 2000);
-    } catch (err) {
+    } catch {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
-      textArea.value = redirectUri;
+      textArea.value = config.redirectUri || '';
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand('copy');
@@ -115,7 +114,7 @@ export function AIFoundryConfigComponent({
     return `https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Authentication/appId/${config.clientId}`;
   };
 
-  const isConfigValid = config.clientId && config.tenantId && config.resourceName && config.deploymentName && redirectUri;
+  const isConfigValid = config.clientId && config.tenantId && config.resourceName && config.deploymentName && config.redirectUri;
 
   return (
     <div className={styles.configSection}>
@@ -171,8 +170,8 @@ export function AIFoundryConfigComponent({
           <input
             type="text"
             id="redirectUri"
-            value={redirectUri}
-            onChange={(e) => setRedirectUri(e.target.value)}
+            value={config.redirectUri || ''}
+            onChange={(e) => handleInputChange('redirectUri', e.target.value)}
             placeholder={showExampleValues ? "e.g., https://yoursite.com/aifoundry.html" : ""}
           />
           <button 

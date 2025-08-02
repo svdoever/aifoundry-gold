@@ -23,7 +23,8 @@ function hasConfigChanged(cache: TokenCache, config: AIFoundryConfig): boolean {
   return (
     cache.config.clientId !== config.clientId ||
     cache.config.tenantId !== config.tenantId ||
-    cache.config.resourceName !== config.resourceName
+    cache.config.resourceName !== config.resourceName ||
+    cache.config.redirectUri !== config.redirectUri
   );
 }
 
@@ -53,12 +54,18 @@ export async function getAccessToken(config: AIFoundryConfig): Promise<string> {
   const { PublicClientApplication } = await import("@azure/msal-browser");
 
   const rootUrl = `${window.location.protocol}//${window.location.host}`;
+  const redirectUri = config.redirectUri || rootUrl;
+
+  // Debug logging to verify redirectUri is being used
+  console.log('AzureProvider: Using redirectUri:', redirectUri);
+  console.log('AzureProvider: Config redirectUri:', config.redirectUri);
+  console.log('AzureProvider: Fallback rootUrl:', rootUrl);
 
   const msalConfig = {
     auth: {
       clientId: config.clientId,
       authority: `https://login.microsoftonline.com/${config.tenantId}`,
-      redirectUri: rootUrl,
+      redirectUri: redirectUri,
     },
   };
 
