@@ -20,6 +20,8 @@ export function AIFoundryConfigComponent({
     deploymentName: ''
   });
   
+  const [redirectUri, setRedirectUri] = useState('');
+  
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Load configuration from URL params and local storage
@@ -29,8 +31,11 @@ export function AIFoundryConfigComponent({
       clientId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'clientId') || '',
       tenantId: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'tenantId') || '',
       resourceName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'resourceName') || '',
-      deploymentName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'deploymentName') || ''
+      deploymentName: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'deploymentName') || '',
+      redirectUri: localStorage.getItem(LOCAL_STORAGE_PREFIX + 'redirectUri') || ''
     };
+
+    const currentPageUrl = window.location.href.split('?')[0]; // Remove query parameters
 
     // Priority: URL params > Local Storage > Defaults
     const newConfig: AIFoundryConfig = {
@@ -40,7 +45,10 @@ export function AIFoundryConfigComponent({
       deploymentName: urlParams.get('deploymentName') || storageValues.deploymentName
     };
 
+    const newRedirectUri = urlParams.get('redirectUri') || storageValues.redirectUri || currentPageUrl;
+
     setConfig(newConfig);
+    setRedirectUri(newRedirectUri);
     onConfigChange?.(newConfig);
   }, [onConfigChange]);
 
@@ -56,7 +64,7 @@ export function AIFoundryConfigComponent({
   };
 
   const saveToStorage = () => {
-    if (!config.clientId || !config.tenantId || !config.resourceName || !config.deploymentName) {
+    if (!config.clientId || !config.tenantId || !config.resourceName || !config.deploymentName || !redirectUri) {
       setMessage({ text: 'Please fill in all configuration fields before saving.', type: 'error' });
       return;
     }
@@ -65,6 +73,7 @@ export function AIFoundryConfigComponent({
     localStorage.setItem(LOCAL_STORAGE_PREFIX + 'tenantId', config.tenantId);
     localStorage.setItem(LOCAL_STORAGE_PREFIX + 'resourceName', config.resourceName);
     localStorage.setItem(LOCAL_STORAGE_PREFIX + 'deploymentName', config.deploymentName);
+    localStorage.setItem(LOCAL_STORAGE_PREFIX + 'redirectUri', redirectUri);
 
     setMessage({ text: 'Configuration saved to local storage!', type: 'success' });
     setTimeout(() => setMessage(null), 3000);
@@ -75,12 +84,38 @@ export function AIFoundryConfigComponent({
     localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'tenantId');
     localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'resourceName');
     localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'deploymentName');
+    localStorage.removeItem(LOCAL_STORAGE_PREFIX + 'redirectUri');
 
     setMessage({ text: 'Configuration cleared from local storage!', type: 'success' });
     setTimeout(() => setMessage(null), 3000);
   };
 
-  const isConfigValid = config.clientId && config.tenantId && config.resourceName && config.deploymentName;
+  const copyRedirectUri = async () => {
+    try {
+      await navigator.clipboard.writeText(redirectUri);
+      setMessage({ text: 'Redirect URI copied to clipboard!', type: 'success' });
+      setTimeout(() => setMessage(null), 2000);
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = redirectUri;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setMessage({ text: 'Redirect URI copied to clipboard!', type: 'success' });
+      setTimeout(() => setMessage(null), 2000);
+    }
+  };
+
+  const getAzurePortalUrl = () => {
+    if (!config.clientId.trim()) {
+      return '#';
+    }
+    return `https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Authentication/appId/${config.clientId}`;
+  };
+
+  const isConfigValid = config.clientId && config.tenantId && config.resourceName && config.deploymentName && redirectUri;
 
   return (
     <div className={styles.configSection}>
@@ -128,6 +163,44 @@ export function AIFoundryConfigComponent({
           onChange={(e) => handleInputChange('deploymentName', e.target.value)}
           placeholder={showExampleValues ? "e.g., gpt-4o, gpt-35-turbo" : ""}
         />
+      </div>
+      
+      <div className={styles.configRow}>
+        <label htmlFor="redirectUri">Redirect URI:</label>
+        <div className={styles.inputWithCopy}>
+          <input
+            type="text"
+            id="redirectUri"
+            value={redirectUri}
+            onChange={(e) => setRedirectUri(e.target.value)}
+            placeholder={showExampleValues ? "e.g., https://yoursite.com/aifoundry.html" : ""}
+          />
+          <button 
+            type="button" 
+            className={styles.copyButton} 
+            onClick={copyRedirectUri}
+            title="Copy to clipboard"
+          >
+            📋
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.configNote}>
+        ⚠️ <strong>Important:</strong> This redirect URI must be registered as a <strong>Single-page application</strong> redirect URI in your Azure App Registration.
+        <br />
+        <a 
+          href={getAzurePortalUrl()} 
+          className={styles.azurePortalLink}
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            pointerEvents: config.clientId.trim() ? 'auto' : 'none',
+            opacity: config.clientId.trim() ? 1 : 0.5
+          }}
+        >
+          🔗 {config.clientId.trim() ? 'Open Azure Portal App Registration' : 'Enter Client ID to enable Azure Portal link'}
+        </a>
       </div>
       
       <div className={styles.buttonRow}>

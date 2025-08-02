@@ -85,6 +85,70 @@
   margin-top: 0.25rem;
 }
 
+.inputWithCopy {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.inputWithCopy input {
+  flex: 1;
+}
+
+.copyButton {
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  color: #666;
+  cursor: pointer;
+  padding: 0.75rem;
+  font-size: 16px;
+  line-height: 1;
+  min-height: 44px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.copyButton:hover {
+  background: #f0f0f0;
+  color: #007acc;
+  border-color: #007acc;
+}
+
+.copyButton:active {
+  background: #007acc;
+  color: white;
+}
+
+.configNote {
+  font-size: 14px;
+  color: #666;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.azurePortalLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #007acc;
+  text-decoration: none;
+  font-size: 14px;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #007acc;
+  border-radius: 4px;
+  background: #f8f8f8;
+  transition: all 0.2s;
+}
+
+.azurePortalLink:hover {
+  background: #007acc;
+  color: white;
+  text-decoration: none;
+}
+
 /* Desktop styles */
 @media (min-width: 768px) {
   .configRow {
@@ -100,6 +164,11 @@
   }
 
   .configRow input {
+    flex: 1;
+    max-width: 400px;
+  }
+
+  .inputWithCopy {
     flex: 1;
     max-width: 400px;
   }
