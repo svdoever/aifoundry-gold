@@ -1,5 +1,5 @@
 import type { AIFoundryConfig } from "./AIFoundryConfigUtils";
-import { streamText, type LanguageModel, type CoreMessage } from "ai";
+import { streamText, type LanguageModel, type ModelMessage } from "ai";
 import { type AzureOpenAIProviderSettings, createAzure } from "@ai-sdk/azure";
 
 // Token cache interface
@@ -95,10 +95,11 @@ export async function createAzureAIFoundryLanguageModel(config: AIFoundryConfig)
   const aiFoundryAccessToken = await getAccessToken(config);
 
   const azureOpenAIProviderSettings: AzureOpenAIProviderSettings = {
-    baseURL: "https://" + config.resourceName + ".openai.azure.com/openai/deployments",
     resourceName: config.resourceName,
+    apiVersion: "preview",
     apiKey: "_", // needed, otherwise exception
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${aiFoundryAccessToken}`,
     },
   };
@@ -111,7 +112,7 @@ export async function createAzureAIFoundryLanguageModel(config: AIFoundryConfig)
 export async function chat(
   languageModel: LanguageModel,
   system: string,
-  messages: CoreMessage[],
+  messages: ModelMessage[],
   sendStreamingUpdate: (text: string) => void,
   sendFinalUpdate: (text: string) => void
 ): Promise<void> {

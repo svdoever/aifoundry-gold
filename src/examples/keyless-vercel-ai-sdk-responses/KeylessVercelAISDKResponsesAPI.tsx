@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AIFoundryConfigComponent } from '../../components/AIFoundryConfig';
 import { AIFoundryConfigUtils, type AIFoundryConfig } from '../../utils/AIFoundryConfigUtils';
-import { createAzureAIFoundryLanguageModel, chat } from '../../utils/AzureProvider';
+import { createAzureAIFoundryResponsesAPILanguageModel, chatResponses } from '../../utils/AzureProviderResponsesAPI';
 import { type ModelMessage } from 'ai';
 import ReactMarkdown from 'react-markdown';
-import styles from './KeylessVercelAISDK.module.css';
+import styles from './KeylessVercelAISDKResponsesAPI.module.css';
 
 interface Message {
   role: 'system' | 'user' | 'assistant';
@@ -12,7 +12,7 @@ interface Message {
   id: string;
 }
 
-export function KeylessVercelAISDK() {
+export function KeylessVercelAISDKResponsesAPI() {
   const [config, setConfig] = useState<AIFoundryConfig | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -69,8 +69,8 @@ export function KeylessVercelAISDK() {
 
     try {
       // Get the language model
-      const languageModel = await createAzureAIFoundryLanguageModel(config);
-      
+      const languageModel = await createAzureAIFoundryResponsesAPILanguageModel(config);
+
       // Convert messages to ModelMessage format
       const modelMessages: ModelMessage[] = messages.map(msg => ({
         role: msg.role,
@@ -84,7 +84,7 @@ export function KeylessVercelAISDK() {
       });
 
       // Call the chat function with streaming callbacks
-      await chat(
+      await chatResponses(
         languageModel,
         systemMessage,
         modelMessages,
@@ -106,7 +106,7 @@ export function KeylessVercelAISDK() {
         }
       );
     } catch (err) {
-      console.error('Error calling Azure API:', err);
+      console.error('Error calling Azure OpenAI Responses API:', err);
       setError(err instanceof Error ? err.message : 'An error occurred while calling the API.');
       setIsStreaming(false);
       setStreamingContent('');
@@ -142,9 +142,9 @@ export function KeylessVercelAISDK() {
       <div className={styles.header}>
         <img src="/aifoundry-gold.svg" alt="Azure AI Foundry Gold" />
         <div className={styles.headerText}>
-          <h1>Azure AI Foundry - Keyless with Vercel AI SDK</h1>
+          <h1>Azure AI Foundry - Keyless with Vercel AI SDK - Responses API</h1>
           <p className={styles.subtitle}>
-            Client-side keyless authentication with streaming support
+            Client-side keyless authentication with streaming support using the OpenAI Responses API
           </p>
         </div>
       </div>
