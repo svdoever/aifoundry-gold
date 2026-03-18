@@ -26,7 +26,7 @@ export function KeylessVercelAISDKResponsesAPI() {
   // Load initial config from localStorage on component mount
   useEffect(() => {
     const initialConfig = AIFoundryConfigUtils.getConfig();
-    console.log('KeylessVercelAISDK: Initial config loaded:', initialConfig);
+    console.log('KeylessVercelAIResponsesSDK: Initial config loaded:', initialConfig);
     setConfig(initialConfig);
   }, []);
 

@@ -7,7 +7,7 @@ async function validateRedirectUri(
         // Check if redirect URI is accessible
         const response = await fetch(redirectUri, {
             method: "HEAD",
-            mode: "no-cors",
+            // mode: "no-cors",
             redirect: "follow",
         });
         if (response.status !== 200) {
@@ -34,7 +34,7 @@ export async function getTokenWithAzureIdentity(clientId: string, tenantId: stri
             tenantId,
             additionallyAllowedTenants: ["*"],
             redirectUri,
-            loginStyle: "popup", // Use popup login style becauze from iframe
+            loginStyle: "popup", // Use popup login style because from iframe
         };
         const credential = new InteractiveBrowserCredential(interactiveBrowserCredentialInBrowserOptions);
         const getTokenOptions: GetTokenOptions = {

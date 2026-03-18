@@ -22,8 +22,8 @@ export async function createAzureAIFoundryResponsesAPILanguageModel(config: AIFo
     },
   };
 
-  const azure = createAzure(azureOpenAIProviderSettings);
-  const openAiChatLanguageModel = azure.responses(config.deploymentName) as LanguageModel;
+  const azureProvider = createAzure(azureOpenAIProviderSettings);
+  const openAiChatLanguageModel = azureProvider.responses(config.deploymentName) as LanguageModel;
   return openAiChatLanguageModel;
 }
 
