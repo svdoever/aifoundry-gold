@@ -109,7 +109,7 @@ export async function createAzureAIFoundryLanguageModel(config: AIFoundryConfig)
   return openAiChatLanguageModel;
 }
 
-export async function chat(
+export async function chatCompletions(
   languageModel: LanguageModel,
   system: string,
   messages: ModelMessage[],
@@ -123,10 +123,12 @@ export async function chat(
       messages: messages,
       onFinish: async (event) => {
         const onFinishResult = event;
-        console.log("Vercel AI SDK stream finished:", onFinishResult);
+        console.log("Vercel AI SDK stream finished while calling Azure OpenAI Completions API:", onFinishResult);
       },
       onError: (error) => {
-        console.log("Error in Vercel AI SDK stream:", error);
+        const theError = "Error in Vercel AI SDK stream while calling Azure OpenAI Completions API: " + (error instanceof Error ? error.message : String(error));
+        console.log(theError);
+        throw new Error(theError);
       },
     });
 
@@ -139,7 +141,8 @@ export async function chat(
 
     sendFinalUpdate(accumulatedText);
   } catch (error) {
-    console.log("Error in chat:", error);
-    throw error;
+    const theError = "Error in chat while calling Azure OpenAI Completions API: " + (error instanceof Error ? error.message : String(error));
+    console.log(theError);
+    throw new Error(theError);
   }
 }

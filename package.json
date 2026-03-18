@@ -1,7 +1,7 @@
 {
   "name": "aifoundry-gold",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "author": "Serge van den Oever",
   "license": "MIT",
@@ -16,15 +16,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ai-sdk/azure": "^2",
-    "@ai-sdk/openai": "^2",
-    "@azure/identity": "^4.10.2",
-    "@azure/msal-browser": "^4.14.0",
-    "ai": "^5",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "@ai-sdk/azure": "^3",
+    "@ai-sdk/openai": "^3",
+    "@azure/identity": "^4.13",
+    "@azure/msal-browser": "^5.5",
+    "ai": "^6",
+    "react": "^19.2",
+    "react-dom": "^19.2",
     "react-markdown": "^10.1.0",
-    "zod": "3.25.76"
+    "zod": "4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
@@ -36,8 +36,8 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.34.1",
-    "vite": "^7.0.0"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1",
+    "vite": "^7"
   }
 }

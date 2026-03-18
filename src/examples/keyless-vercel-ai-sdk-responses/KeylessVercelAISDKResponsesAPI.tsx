@@ -107,7 +107,7 @@ export function KeylessVercelAISDKResponsesAPI() {
       );
     } catch (err) {
       console.error('Error calling Azure OpenAI Responses API:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred while calling the API.');
+      setError(err instanceof Error ? err.message : 'An error occurred while calling the Azure OpenAI Responses API.');
       setIsStreaming(false);
       setStreamingContent('');
     } finally {

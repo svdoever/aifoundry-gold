@@ -51,7 +51,9 @@ export async function chatResponses(
         console.log("Vercel AI SDK stream finished:", onFinishResult);
       },
       onError: (error) => {
-        console.log("Error in Vercel AI SDK stream:", error);
+        const theError = "Error in Vercel AI SDK stream while calling Azure OpenAI Responses API: " + (error instanceof Error ? error.message : String(error));
+        console.log(theError);
+        throw new Error(theError);
       },
     });
 
@@ -64,7 +66,8 @@ export async function chatResponses(
 
     sendFinalUpdate(accumulatedText);
   } catch (error) {
-    console.log("Error in chat:", error);
-    throw error;
+    const theError = "Error in chat while calling Azure OpenAI Responses API: " + (error instanceof Error ? error.message : String(error));
+    console.log(theError);
+    throw new Error(theError) ;
   }
 }

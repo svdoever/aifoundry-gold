@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AIFoundryConfigComponent } from '../../components/AIFoundryConfig';
 import { AIFoundryConfigUtils, type AIFoundryConfig } from '../../utils/AIFoundryConfigUtils';
-import { createAzureAIFoundryLanguageModel, chat } from '../../utils/AzureProvider';
+import { createAzureAIFoundryLanguageModel, chatCompletions } from '../../utils/AzureProviderCompletionsAPI';
 import { type ModelMessage } from 'ai';
 import ReactMarkdown from 'react-markdown';
-import styles from './KeylessVercelAISDK.module.css';
+import styles from './KeylessVercelAISDKCompletionsAPI.module.css';
 
 interface Message {
   role: 'system' | 'user' | 'assistant';
@@ -12,7 +12,7 @@ interface Message {
   id: string;
 }
 
-export function KeylessVercelAISDK() {
+export function KeylessVercelAICompletionsSDK() {
   const [config, setConfig] = useState<AIFoundryConfig | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -26,7 +26,7 @@ export function KeylessVercelAISDK() {
   // Load initial config from localStorage on component mount
   useEffect(() => {
     const initialConfig = AIFoundryConfigUtils.getConfig();
-    console.log('KeylessVercelAISDK: Initial config loaded:', initialConfig);
+    console.log('KeylessVercelAICompletionsSDK: Initial config loaded:', initialConfig);
     setConfig(initialConfig);
   }, []);
 
@@ -38,7 +38,7 @@ export function KeylessVercelAISDK() {
   }, [messages, streamingContent]);
 
   const handleConfigChange = useCallback((newConfig: AIFoundryConfig) => {
-    console.log('KeylessVercelAISDK: Config changed:', newConfig);
+    console.log('KeylessVercelAICompletionsSDK: Config changed:', newConfig);
     setConfig(newConfig);
   }, []);
 
@@ -84,7 +84,7 @@ export function KeylessVercelAISDK() {
       });
 
       // Call the chat function with streaming callbacks
-      await chat(
+      await chatCompletions(
         languageModel,
         systemMessage,
         modelMessages,
@@ -106,8 +106,8 @@ export function KeylessVercelAISDK() {
         }
       );
     } catch (err) {
-      console.error('Error calling Azure API:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred while calling the API.');
+      console.error('Error calling Azure OpenAI Completion API:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred while calling the Azure OpenAI Completion API.');
       setIsStreaming(false);
       setStreamingContent('');
     } finally {
@@ -144,7 +144,7 @@ export function KeylessVercelAISDK() {
         <div className={styles.headerText}>
           <h1>Azure AI Foundry - Keyless with Vercel AI SDK</h1>
           <p className={styles.subtitle}>
-            Client-side keyless authentication with streaming support
+            Client-side keyless authentication with streaming support using the OpenAI Completions API
           </p>
         </div>
       </div>
