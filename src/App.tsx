@@ -146,11 +146,11 @@ function App() {
                   let demoUrl;
                   if (isRoot) {
                     // Root path - use absolute path
-                    demoUrl = `${window.location.origin}/keyless-vercel-ai-sdk.html`;
+                    demoUrl = `${window.location.origin}/keyless-vercel-ai-sdk-completions.html`;
                   } else {
                     // Subdirectory deployment - use relative to current directory
                     const basePath = currentPath.endsWith('/') ? currentPath : currentPath + '/';
-                    demoUrl = `${window.location.origin}${basePath}keyless-vercel-ai-sdk.html`;
+                    demoUrl = `${window.location.origin}${basePath}keyless-vercel-ai-sdk-completions.html`;
                   }
                   
                   window.open(demoUrl, '_blank');

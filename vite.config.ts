@@ -8,7 +8,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
-        'keyless-vercel-ai-sdk': './keyless-vercel-ai-sdk.html'
+        'keyless-vercel-ai-sdk-completions': './keyless-vercel-ai-sdk-completions.html',
+        'keyless-vercel-ai-sdk-responses': './keyless-vercel-ai-sdk-responses.html'
       }
     }
   }
