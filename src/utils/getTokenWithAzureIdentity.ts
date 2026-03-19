@@ -47,7 +47,7 @@ export async function getTokenWithAzureIdentity(clientId: string, tenantId: stri
         const tokenResult = await credential.getToken(tokenScopes, getTokenOptions);
         return tokenResult.token;
     } catch (err) {
-        const error = err as Error & { errorCode : string };
+        const error = err as Error & { errorCode: string };
         console.error("Error getting token with Azure Identity:", error);
 
         // Handle specific error types
