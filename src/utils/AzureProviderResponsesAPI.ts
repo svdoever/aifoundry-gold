@@ -1,6 +1,6 @@
 import type { AIFoundryConfig } from "./AIFoundryConfigUtils";
 import { streamText, type LanguageModel, type ModelMessage, type ToolSet } from "ai";
-import { type AzureOpenAIProviderSettings, createAzure, azure } from "@ai-sdk/azure";
+import { type AzureOpenAIProviderSettings, createAzure } from "@ai-sdk/azure";
 import { getTokenWithAzureIdentity } from "./getTokenWithAzureIdentity";
 import { openai } from "@ai-sdk/openai";
 

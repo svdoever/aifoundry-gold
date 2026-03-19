@@ -1,1 +1,1 @@
-export { KeylessVercelAISDK } from './KeylessVercelAISDKResponsesAPI';
+export { KeylessVercelAISDKResponsesAPI } from './KeylessVercelAISDKResponsesAPI';
